@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>相似な図形：形を保つ拡大と縮小の幾何学 - 究極のアーカイブ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media', // デバイスのテーマ設定に自動追従
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', '"Noto Sans JP"', 'sans-serif'],
+                        serif: ['"Noto Serif JP"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            scroll-behavior: smooth;
+            line-height: 2.4; /* 行間を広げて読みやすく */
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        .serif-text {
+            font-family: 'Noto Serif JP', serif;
+        }
+
+        /* Slide-out Panel Styles */
+        .quiz-panel {
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateX(100%);
+            box-shadow: -10px 0 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-panel.active {
+            transform: translateX(0);
+        }
+
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .glass-morphism {
+                background: rgba(15, 23, 42, 0.85);
+                border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            }
+        }
+
+        .content-card {
+            width: 100%;
+            border-radius: 1.5rem;
+            padding: 4rem;
+            margin-bottom: 5rem;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .content-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.08);
+        }
+
+        .equation-box {
+            border-left: 6px solid #4f46e5;
+            background: linear-gradient(90deg, rgba(79, 70, 229, 0.05) 0%, transparent 100%);
+            padding: 3rem;
+            margin: 4rem 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            border-radius: 0 1rem 1rem 0;
+            font-family: 'Noto Serif JP', serif;
+            letter-spacing: 0.05em;
+            overflow-x: auto;
+        }
+
+        .chapter-title {
+            position: relative;
+            padding-bottom: 1.5rem;
+            margin-bottom: 3.5rem;
+            font-size: 2.25rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.3;
+            border-bottom: 1px solid #cbd5e1;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .chapter-title {
+                border-bottom: 1px solid #334155;
+            }
+        }
+
+        .chapter-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 80px;
+            height: 4px;
+            background: #4f46e5;
+            border-radius: 2px;
+        }
+
+        .sub-section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-top: 4.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            color: #312e81;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .sub-section-title {
+                color: #e0e7ff;
+            }
+        }
+
+        .sub-section-title::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 28px;
+            background: #6366f1;
+            margin-right: 16px;
+            border-radius: 99px;
+        }
+
+        p { margin-bottom: 2.5rem; font-size: 1.125rem; text-align: justify; letter-spacing: 0.04em; color: #334155; }
+        
+        @media (prefers-color-scheme: dark) {
+            p { color: #94a3b8; }
+        }
+
+        .diagram-box {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 2rem;
+            padding: 4rem 2rem;
+            margin: 5rem 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .diagram-box {
+            width: 100%;
+            overflow-x: auto;
+                background-color: #0f172a;
+                border: 1px solid #1e293b;
+            }
+        }
+
+        .highlight-text {
+            background: linear-gradient(180deg, transparent 65%, #c7d2fe 65%);
+            font-weight: 700;
+            padding: 0 4px;
+            color: #1e1b4b;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .highlight-text {
+                background: linear-gradient(180deg, transparent 65%, #312e81 65%);
+                color: #e0e7ff;
+            }
+        }
+
+        /* Trivia Box Styling */
+        .trivia-box {
+            border-radius: 1.25rem;
+            padding: 2.5rem 3rem;
+            margin: 4rem 0;
+            position: relative;
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .trivia-box {
+                background-color: rgba(120, 53, 15, 0.1);
+                border: 1px solid rgba(180, 83, 9, 0.4);
+            }
+        }
+
+        .trivia-badge {
+            position: absolute;
+            top: -16px;
+            left: 32px;
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: white;
+            padding: 6px 20px;
+            border-radius: 9999px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Quiz UI */
+        .quiz-input {
+            transition: all 0.2s ease;
+        }
+        .quiz-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+        .correct-answer {
+            background-color: #f0fdf4 !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+            box-shadow: 0 0 0 1px #22c55e;
+        }
+        .incorrect-answer {
+            background-color: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+            box-shadow: 0 0 0 1px #ef4444;
+        }
+        
+        .feedback-box {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 2rem;
+            border-radius: 1rem;
+            font-size: 1rem;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* KaTeX SVG fix */
+        foreignObject { overflow: visible; }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Math formula specific styling */
+        .math-block {
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+    
+        @media (max-width: 768px) {
+            .diagram-box svg { max-width: 100% !important; height: auto !important; }
+            .diagram-box > div { transform: scale(0.8); transform-origin: center top; width: 100% !important; }
+            /* 天秤などの固定幅要素をモバイルで縮小 */
+            .w-80 { max-width: 90vw !important; }
+            .max-w-lg { max-width: 100% !important; }
+            /* 数式ボックスのフォントサイズをさらに調整 */
+            .equation-box { font-size: 1.25rem !important; overflow-x: auto !important; }
+    
+            .content-card { padding: 2rem 1.5rem !important; margin-bottom: 3rem !important; }
+            .equation-box { font-size: 1.5rem !important; padding: 1.5rem !important; margin: 2rem 0 !important; }
+            .chapter-title { font-size: 1.75rem !important; margin-bottom: 2rem !important; }
+            .sub-section-title { font-size: 1.3rem !important; margin-top: 3rem !important; }
+            p { font-size: 1rem !important; line-height: 1.8 !important; margin-bottom: 1.5rem !important; }
+            .diagram-box {
+            width: 100%;
+            overflow-x: auto; padding: 2rem 1rem !important; margin: 3rem 0 !important; }
+            .trivia-box { padding: 2rem 1.5rem !important; margin: 3rem 0 !important; }
+            .quiz-panel { width: 100% !important; }
+            .max-w-4xl { padding-left: 1rem !important; padding-right: 1rem !important; }
+            .max-w-7xl { padding-left: 1rem !important; padding-right: 1rem !important; }
+        }
+    
+    
+        /* 図形要素の完全レスポンシブ化 */
+        .diagram-box {
+            width: 100% !important;
+            overflow-x: hidden !important; /* 横スクロールを禁止し、中身を縮小させる */
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+        
+        .diagram-box > div {
+            width: 100% !important;
+            max-width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        /* 天秤などの固定幅要素を画面幅に合わせて縮小 */
+        @media (max-width: 768px) {
+            .diagram-box > div {
+                transform: scale(0.85); /* 全体を少し縮小 */
+                transform-origin: center center;
+            }
+            
+            /* 天秤の横棒 (w-80 = 320px) を画面幅に収める */
+            .w-80 {
+                width: 260px !important; /* モバイル用に固定幅を小さく設定 */
+            }
+            
+            /* 左右の皿の配置を内側に寄せる */
+            .left-8 { left: 0px !important; }
+            .right-8 { right: 0px !important; }
+            .md\:left-16 { left: 0px !important; }
+            .md\:right-16 { right: 0px !important; }
+            
+            /* 皿自体の幅も少し小さくする */
+            .w-24 { width: 80px !important; }
+            
+            /* 数式ボックスの文字サイズ調整 */
+            .equation-box {
+                font-size: 1.2rem !important;
+                padding: 1rem !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .diagram-box > div {
+                transform: scale(0.7); /* さらに小さい画面ではもっと縮小 */
+            }
+            .w-80 {
+                width: 220px !important;
+            }
+        }
+    
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-200 dark:selection:bg-indigo-900">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-40 glass-morphism">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Similarity Triangle Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24">
+                     <polygon points="3,20 11,20 7,12" />
+                     <polygon points="13,20 22,20 17.5,10" />
+                </svg>
+                <span class="font-bold text-lg tracking-tight hidden sm:block">Archive: Similarity</span>
+            </div>
+            <button id="quizTrigger" class="group bg-slate-900 text-white dark:bg-indigo-600 dark:text-white px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-3 text-sm md:text-base border border-transparent hover:border-indigo-400">
+                <!-- Bootstrap Icon: pencil-square -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="transition-transform group-hover:rotate-12" viewBox="0 0 16 16">
+                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                </svg>
+                <span>無限演習ジェネレーター</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto w-full overflow-x-hidden px-6 py-24">
+        
+        <!-- Hero Section -->
+        <header class="text-center mb-32">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:border-indigo-800 dark:text-indigo-300 text-xs font-bold uppercase tracking-widest mb-6">
+                The Geometry of Scaling
+            </div>
+            <h1 class="text-5xl md:text-8xl font-black mb-10 tracking-tight leading-tight">
+                <span class="hero-gradient">相似な図形</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-400 serif-text max-w-3xl mx-auto leading-loose">
+                形を変えずに大きさを変える魔法。<br>
+                対応する辺の比と角の保存という不変のルール。<br>
+                タレスのピラミッド測量から現代のフラクタル幾何学に至るまで、<br>
+                スケールを超えて世界を貫く「自己相似」の真理を紐解く。
+            </p>
+        </header>
+
+        <!-- Chapter 1: Essence -->
+        <section class="content-card bg-white border border-slate-100 dark:bg-slate-900 dark:border-slate-800">
+            <h2 class="chapter-title text-slate-900 dark:text-slate-100">第1章：形を保つ魔法と「相似比」</h2>
+            <div class="serif-text">
+                <p>
+                    <strong>相似（Similarity）</strong>とは、一つの図形を「形を変えずに」拡大または縮小した関係にあることだ。数学的には、対応するすべての角の大きさが等しく、かつ、対応するすべての辺の長さの比が等しい状態を指す。
+                    写真をスマートフォンでピンチアウトして拡大しても、写っている人の顔が伸びたり縮んだりしないのは、この「相似」の性質が保たれているからである。
+                </p>
+
+                <p>
+                    大きさの比率を表す<span class="highlight-text">「相似比（Similarity Ratio）」</span>は、相似な図形を支配する強力なパラメーターだ。相似比が $1:2$ であれば、すべての辺の長さは2倍になる。
+                    しかし、ここで直感に反する魔法が起きる。長さが2倍になれば、面積は $2 \times 2 = 4$ 倍に、体積は $2 \times 2 \times 2 = 8$ 倍に跳ね上がるのだ。「相似比が $m:n$ ならば、面積比は $m^2:n^2$、体積比は $m^3:n^3$ になる」。これは幾何学における最も美しく、かつ実用的な法則の一つである。
+                </p>
+
+                <div class="diagram-box">
+                    <h4 class="text-lg font-bold mb-12 text-slate-700 dark:text-slate-300 tracking-wider">スケールを超える不変性</h4>
+                    
+                    <!-- Triangle Similarity Visualization -->
+                    <div class="relative w-full max-w-lg flex items-end justify-center gap-12 p-4">
+                        
+                        <!-- Small Triangle -->
+                        <div class="relative flex flex-col items-center">
+                            <svg width="120" height="160" viewBox="0 0 120 160" class="overflow-visible">
+                                <polygon points="10,150 110,150 10,10" class="fill-indigo-100 stroke-indigo-500 dark:fill-indigo-900/40 dark:stroke-indigo-400" stroke-width="3"/>
+                                <!-- Right angle mark -->
+                                <polyline points="10,140 20,140 20,150" fill="none" class="stroke-indigo-500 dark:stroke-indigo-400" stroke-width="2"/>
+                                <!-- Labels -->
+                                <text x="60" y="170" text-anchor="middle" class="fill-slate-600 dark:fill-slate-400 font-serif font-bold">3</text>
+                                <text x="-5" y="80" text-anchor="end" class="fill-slate-600 dark:fill-slate-400 font-serif font-bold">4</text>
+                                <text x="70" y="70" text-anchor="start" class="fill-slate-600 dark:fill-slate-400 font-serif font-bold">5</text>
+                            </svg>
+                            <div class="mt-6 text-sm font-bold text-slate-500">図形 A</div>
+                        </div>
+
+                        <!-- Scale Arrow -->
+                        <div class="flex flex-col items-center justify-center pb-10 hidden sm:flex">
+                            <div class="text-indigo-600 dark:text-indigo-400 font-bold mb-2">相似比 $1:2$</div>
+                            <svg width="60" height="20" viewBox="0 0 60 20">
+                                <path d="M 0,10 L 50,10 M 45,5 L 55,10 L 45,15" stroke="currentColor" stroke-width="2" fill="none" class="text-slate-400"/>
+                            </svg>
+                        </div>
+
+                        <!-- Large Triangle -->
+                        <div class="relative flex flex-col items-center">
+                            <svg width="240" height="320" viewBox="0 0 240 320" class="overflow-visible transform origin-bottom scale-[0.8] sm:scale-100">
+                                <polygon points="20,300 220,300 20,20" class="fill-rose-50 stroke-rose-500 dark:fill-rose-900/20 dark:stroke-rose-400" stroke-width="3" stroke-dasharray="6,4"/>
+                                <!-- Right angle mark -->
+                                <polyline points="20,280 40,280 40,300" fill="none" class="stroke-rose-500 dark:stroke-rose-400" stroke-width="2"/>
+                                <!-- Labels -->
+                                <text x="120" y="325" text-anchor="middle" class="fill-slate-600 dark:fill-slate-400 font-serif font-bold text-lg">6</text>
+                                <text x="0" y="160" text-anchor="end" class="fill-slate-600 dark:fill-slate-400 font-serif font-bold text-lg">8</text>
+                                <text x="140" y="140" text-anchor="start" class="fill-slate-600 dark:fill-slate-400 font-serif font-bold text-lg">10</text>
+                            </svg>
+                            <div class="mt-2 text-sm font-bold text-slate-500">図形 B</div>
+                        </div>
+
+                    </div>
+
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-8 italic text-center max-w-lg">
+                        各辺の長さが2倍になっても、直角や他の鋭角の大きさは全く変わらない。<br>
+                        このとき、面積は $2^2 = 4$倍 になっている。
+                    </p>
+                </div>
+
+                <div class="equation-box text-slate-900 dark:text-slate-100 shadow-sm">
+                    <p class="text-center text-5xl font-bold tracking-widest py-4">
+                        △ABC ∽ △DEF
+                    </p>
+                </div>
+
+                <h3 class="sub-section-title">物理的な解釈：ズームと解像度</h3>
+                <p>
+                    地図の「縮尺」は相似の最も身近な例である。$\frac{1}{10000}$ の地図は、現実世界という巨大な図形と相似比 $1:10000$ の相似な図形である。
+                    地図上の1cmは現実の10000cm（100m）を正確に表現している。形が歪んでいれば、私たちは目的地に辿り着くことができない。相似とは、異なるスケールの世界を繋ぐ翻訳システムなのである。
+                </p>
+
+                <!-- Trivia 1 -->
+                <div class="trivia-box">
+                    <span class="trivia-badge">
+                        豆知識：記号「$\backsim$」の由来
+                    </span>
+                    <p class="mb-0 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                        相似を表す記号「$\backsim$」は、英語の「Similar（相似の）」の頭文字である「S」を横に寝かせたものに由来する。これを考案したのは微積分の発見者でもあるライプニッツだと言われている。ちなみに合同を表す「$\equiv$」に「$\backsim$」を乗せた「$\cong$」などの記号も存在するが、国によって使われる記号の形が微妙に異なる。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chapter 1.5: Calculation -->
+        <section class="content-card bg-white border border-slate-100 dark:bg-slate-900 dark:border-slate-800">
+            <h2 class="chapter-title text-slate-900 dark:text-slate-100">実践：相似条件と計算のアルゴリズム</h2>
+            <div class="serif-text">
+                <p>
+                    相似であることを証明し、そこから未知の長さを導き出すには、明確なルール（相似条件）と「比例式」を利用する。これらを使いこなすことが図形問題攻略の鍵となる。
+                </p>
+
+                <!-- Method 1: Conditions -->
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-8 rounded-2xl border border-indigo-100 dark:border-indigo-800 mb-10">
+                    <p class="font-bold text-indigo-900 dark:text-indigo-200 mb-4 flex items-center gap-2">
+                        <span class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
+                        三角形の相似条件（3つの武器）
+                    </p>
+                    <div class="pl-4 border-l-2 border-indigo-200 dark:border-indigo-700 mb-6">
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                            2つの三角形が相似であると言うためには、以下のいずれか1つを満たすことを証明すればよい。
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700 dark:text-slate-300 font-bold mb-4 bg-white dark:bg-slate-800 p-4 rounded-lg border border-indigo-100 dark:border-indigo-900">
+                            <li>3組の辺の比がすべて等しい</li>
+                            <li>2組の辺の比とその間の角がそれぞれ等しい</li>
+                            <li>2組の角がそれぞれ等しい</li>
+                        </ul>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">
+                            特に3つ目の「2組の角がそれぞれ等しい」は、辺の長さを知らなくても形だけで判定できるため、圧倒的に使用頻度が高い。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Method 2: Proportional Equations -->
+                <div class="bg-rose-50 dark:bg-rose-900/20 p-8 rounded-2xl border border-rose-100 dark:border-rose-800 mb-8">
+                    <p class="font-bold text-rose-900 dark:text-rose-200 mb-4 flex items-center gap-2">
+                        <span class="bg-rose-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
+                        比例式の解き方：内項の積と外項の積
+                    </p>
+                    <div class="pl-4 border-l-2 border-rose-200 dark:border-rose-700">
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                            相似比を使って未知の辺の長さを求める際、$a : b = c : x$ という式が頻出する。
+                        </p>
+                        <div class="math-block text-xl font-bold text-rose-800 dark:text-rose-300 p-3 bg-white dark:bg-slate-800 rounded-lg border border-rose-100 dark:border-rose-900 text-center mb-4">
+                            $$ a : b = c : x \implies ax = bc $$
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">
+                            「内側同士を掛けたものと、外側同士を掛けたものは等しい」という性質を使えば、分数を作らなくても一瞬で1次方程式に変形できる。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Trivia 2 -->
+                <div class="trivia-box">
+                    <span class="trivia-badge">
+                        豆知識：面積比と体積比の罠
+                    </span>
+                    <p class="mb-0 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                        「相似比が $2:3$ のとき、面積比も $2:3$ だろう」という直感的な思い込みは、中学生が最も陥りやすい罠である。正しくは $2^2:3^2 = 4:9$ となる。ピザのサイズが直径20cmから30cm（相似比 $2:3$）になったとき、食べられる量は1.5倍ではなく、2.25倍（$9 \div 4$）に増えているのだ。これを知っているだけで人生で損をせずに済むかもしれない。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chapter 2: History -->
+        <section class="content-card bg-white border border-slate-100 dark:bg-slate-900 dark:border-slate-800">
+            <h2 class="chapter-title text-slate-900 dark:text-slate-100">第2章：ピラミッドの影とタレスの知恵</h2>
+            <div class="serif-text text-xl leading-relaxed">
+                <p>
+                    相似の歴史は古く、紀元前6世紀の古代ギリシャの哲学者であり、最初の数学者とも呼ばれるタレスの有名な逸話にまで遡る。
+                </p>
+                
+                <h3 class="sub-section-title">巨大なピラミッドを測る</h3>
+                <p>
+                    タレスがエジプトを訪れた際、巨大なクフ王のピラミッドの高さを測るという難題に挑んだ。彼が使った道具は、特別な測量機器ではなく「1本の棒」だけであった。
+                    彼は太陽の光が地球には平行に降り注ぐことに着目した。地面に垂直に立てた棒と、その影が作る直角三角形は、ピラミッドの高さとピラミッドの影が作る巨大な直角三角形と「相似」になる。
+                </p>
+
+                <h3 class="sub-section-title">時を待つ測量</h3>
+                <p>
+                    彼は、太陽の角度が変わり「棒の影の長さが、棒の長さとちょうど等しくなる瞬間」を待った。その瞬間にピラミッドの影の長さを測れば、計算すら不要でピラミッドの高さが分かるからだ。
+                    別の伝承によれば、「棒の長さ : 棒の影 = ピラミッドの高さ : ピラミッドの影」という比例式を用いたともされる。いずれにせよ、これは「2組の角がそれぞれ等しい」という相似条件を利用した、人類初の論理的測量であった。
+                </p>
+            </div>
+        </section>
+
+        <!-- Chapter 3: Proofs -->
+        <section class="content-card bg-white border border-slate-100 dark:bg-slate-900 dark:border-slate-800">
+            <h2 class="chapter-title text-slate-900 dark:text-slate-100">第3章：相似条件の論理構造</h2>
+            <div class="serif-text text-xl leading-relaxed">
+                <p>
+                    なぜ三角形の相似条件は3つしかないのか？ そしてなぜ「2つの角」だけで相似が確定するのだろうか？ その背後には、ユークリッド幾何学の美しい論理構造が隠されている。
+                </p>
+
+                <h3 class="sub-section-title">大きさを捨て、形だけを残す</h3>
+                <p>
+                    「合同（全く同じ形・同じ大きさ）」の条件には、「1組の辺とその両端の角がそれぞれ等しい」というものがある。
+                    相似においては「辺の長さ（大きさ）」は問わず「形」だけが重要である。したがって、この合同条件から「辺の長さ」という制約を取り払うと、「2つの角が等しい」ことだけが残るのだ。
+                </p>
+                
+                <h3 class="sub-section-title">内角の和がもたらす必然</h3>
+                <p>
+                    平面上の三角形の内角の和は常に $180^\circ$ である。したがって、2つの角が等しければ、残りの1つの角（$180^\circ - \text{角A} - \text{角B}$）も必然的に等しくなる。
+                    3つの角がすべて等しい図形は、どう拡大・縮小しても元の形にぴったり重なる。つまり「2つの角が等しい」というだけで、図形のDNAである形が完全に決定されてしまうのである。これは平面幾何学の強固な論理的帰結だ。
+                </p>
+            </div>
+        </section>
+
+        <!-- Chapter 4: Modern World -->
+        <section class="content-card bg-white border border-slate-100 dark:bg-slate-900 dark:border-slate-800">
+            <h2 class="chapter-title text-slate-900 dark:text-slate-100">第4章：フラクタルと自己相似の宇宙</h2>
+            <div class="serif-text text-xl leading-relaxed">
+                <p>
+                    現代において、相似の概念は中学校の幾何学を飛び出し、「フラクタル（Fractal）」という新たな数学・物理学の領域へと進化した。
+                </p>
+
+                <h3 class="sub-section-title">自己相似性という無限</h3>
+                <p>
+                    フラクタルとは、図形の一部を拡大すると、全体と同じ形が無限に現れる「自己相似性（Self-similarity）」を持つ構造のことだ。
+                    フランスの数学者ブノワ・マンデルブロが提唱したこの概念は、数学の枠を超え、自然界のあらゆる場所に存在することが判明した。
+                </p>
+
+                <h3 class="sub-section-title">自然界のフラクタル</h3>
+                <p>
+                    カリフラワーの一種である「ロマネスコ」の螺旋形状、入り組んだリアス式海岸線、雪の結晶、血管の分岐、さらには株価の変動グラフ（1日の変動パターンと1年の変動パターンが似ている現象）に至るまで、世界は自己相似的なフラクタル構造で満ちている。
+                    映画やゲームのCGでリアルな山脈や雲を描画する際にも、この自己相似のアルゴリズムが使われている。相似とは、単なるテスト問題のための図形操作ではなく、宇宙を形作る根本的なデザインルールなのである。
+                </p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section class="text-center py-24 bg-white rounded-3xl shadow-sm border border-slate-100 dark:bg-slate-900 dark:border-slate-800 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            <div class="h-1 bg-indigo-100 dark:bg-indigo-900/30 w-32 mx-auto mb-12 rounded-full"></div>
+            <h2 class="text-4xl font-black mb-10 text-slate-800 dark:text-slate-100 tracking-tight">スケールを超える真理</h2>
+            <p class="text-xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto serif-text leading-loose px-4">
+                ミクロの細胞から、マクロな宇宙の構造まで。<br>
+                大きさが変わっても「形（関係性）」が保たれるという事実は、<br>
+                この世界がランダムではなく、<br>
+                確固たる秩序に基づいて設計されていることを証明している。<br>
+                相似を学ぶことは、見えない法則を見抜く目を養うことなのだ。
+            </p>
+        </section>
+
+    </main>
+
+    <!-- Quiz Panel -->
+    <div id="quizPanel" class="quiz-panel w-full md:w-[450px] fixed top-0 right-0 h-full w-full md:w-[650px] bg-white shadow-2xl z-50 flex flex-col border-l border-slate-100 dark:bg-slate-900 dark:border-slate-800">
+        <!-- Panel Header -->
+        <div class="p-8 border-b flex justify-between items-center bg-indigo-900 text-white shadow-md dark:bg-slate-950 dark:border-slate-800">
+            <div>
+                <h3 class="text-2xl font-bold flex items-center gap-3">
+                    Practice Problems
+                </h3>
+                <p class="text-xs text-indigo-200 mt-1 uppercase tracking-widest pl-0">Infinite Random Generator</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="generateBtn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-sm font-bold transition-all shadow-lg border border-indigo-400 flex items-center gap-2 dark:bg-indigo-700 dark:hover:bg-indigo-600 dark:border-indigo-600 transform active:scale-95">
+                    <!-- Bootstrap Icon: shuffle -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"/>
+                        <path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"/>
+                    </svg>
+                    問題を生成
+                </button>
+                <button id="closeQuiz" class="p-2.5 hover:bg-indigo-800 rounded-lg transition-colors text-indigo-200 hover:text-white">
+                    <!-- Bootstrap Icon: x-lg -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Quiz Content Area -->
+        <div class="flex-1 overflow-y-auto p-8 bg-slate-50 dark:bg-slate-900 scrollbar-thin">
+            <div id="quizContainer" class="space-y-12">
+                <div class="text-center text-slate-500 dark:text-slate-400 py-32 flex flex-col items-center justify-center h-full">
+                    <div class="bg-indigo-50 dark:bg-indigo-900/20 p-8 rounded-full mb-8 animate-pulse">
+                        <!-- Bootstrap Icon: patch-check-fill -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" class="text-indigo-400" viewBox="0 0 16 16">
+                            <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89-.01-.622-.636zM10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                        </svg>
+                    </div>
+                    <p class="text-2xl mb-3 font-bold text-slate-700 dark:text-slate-200">準備完了</p>
+                    <p class="text-slate-500 dark:text-slate-400 max-w-xs mx-auto">右上の「問題を生成」ボタンを押して、<br>自動生成プログラムによる演習を開始してください。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-slate-900 text-white py-24 text-center dark:bg-slate-950 dark:border-t dark:border-slate-800">
+        <p class="text-slate-500 mb-6 tracking-[0.4em] text-sm uppercase">Mathematical Archive Project</p>
+        <p class="text-sm opacity-40 serif-text italic max-w-md mx-auto leading-relaxed">
+            "The universe is written in the language of mathematics, and its characters are triangles, circles, and other geometric figures."
+            <br>– Galileo Galilei
+        </p>
+    </footer>
+
+    <script>
+        // Global variables for the quiz
+        let currentQuestions = [];
+        
+        // --- 1. Math Render Logic ---
+        function renderMath() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ],
+                throwOnError: false
+            });
+        }
+
+        // --- 2. Problem Generation Algorithm (Similarity) ---
+        function generateSimilarity() {
+            const problems = [];
+            
+            // Generate 10 random problems
+            for (let i = 0; i < 10; i++) {
+                const type = Math.random();
+                let questionText = "";
+                let targetVal = 0;
+                let explanation = "";
+                let unit = ""; 
+                let isApplied = false;
+
+                if (type < 0.3) {
+                    // Type 1: Find side length using similarity ratio
+                    // Ratio a:b. Side x -> Side y.
+                    const a = Math.floor(Math.random() * 4) + 2; // 2 to 5
+                    let b = Math.floor(Math.random() * 4) + 2;
+                    while (a === b) { b = Math.floor(Math.random() * 4) + 2; }
+                    
+                    const multiplier = Math.floor(Math.random() * 5) + 2;
+                    const sideA = a * multiplier;
+                    const sideB = b * multiplier;
+
+                    questionText = `相似な2つの図形 $P, Q$ があり、その相似比は $${a}:${b}$ です。<br>図形 $P$ のある辺の長さが $${sideA}$ cm のとき、図形 $Q$ の対応する辺の長さを求めなさい。`;
+                    targetVal = sideB;
+                    unit = "cm";
+                    explanation = `<strong>比例式を使う</strong><br>
+                    対応する辺の長さの比も $${a}:${b}$ になります。<br>
+                    図形 $Q$ の辺を $x$ とすると、<br>
+                    $${a} : ${b} = ${sideA} : x$<br>
+                    内項の積と外項の積は等しいので、<br>
+                    $${a}x = ${b} \\times ${sideA}$<br>
+                    $${a}x = ${b * sideA} \\implies x = ${sideB}$`;
+
+                } else if (type < 0.6) {
+                    // Type 2: Area ratio from similarity ratio
+                    // Ratio a:b -> Area S1 -> Area S2
+                    const a = Math.floor(Math.random() * 3) + 2; // 2, 3, 4
+                    let b = Math.floor(Math.random() * 3) + 2;
+                    while (a === b) { b = Math.floor(Math.random() * 3) + 2; }
+                    
+                    const areaMultiplier = Math.floor(Math.random() * 4) + 2; // 2, 3, 4, 5
+                    const areaA = (a * a) * areaMultiplier;
+                    const areaB = (b * b) * areaMultiplier;
+
+                    questionText = `相似な2つの図形 $A, B$ があり、相似比は $${a}:${b}$ です。<br>図形 $A$ の面積が $${areaA}$ $\\text{cm}^2$ のとき、図形 $B$ の面積を求めなさい。`;
+                    targetVal = areaB;
+                    unit = "cm²";
+                    explanation = `<strong>面積比は相似比の2乗</strong><br>
+                    相似比が $${a}:${b}$ なので、面積比は $${a}^2 : ${b}^2 = ${a*a} : ${b*b}$ となります。<br>
+                    図形 $B$ の面積を $x$ とすると、<br>
+                    $${a*a} : ${b*b} = ${areaA} : x$<br>
+                    $${a*a}x = ${b*b * areaA} \\implies x = ${areaB}$`;
+
+                } else if (type < 0.85) {
+                    // Type 3: Volume ratio from similarity ratio
+                    isApplied = true;
+                    // バグ修正: a, b を 2〜4 に固定し、a ≠ b となるようにする
+                    const a = Math.floor(Math.random() * 3) + 2; // 2, 3, 4
+                    let b;
+                    do {
+                        b = Math.floor(Math.random() * 3) + 2; // 2, 3, 4
+                    } while (a === b);
+                    
+                    const volMultiplier = Math.floor(Math.random() * 3) + 2;
+                    const volA = (a * a * a) * volMultiplier;
+                    const volB = (b * b * b) * volMultiplier;
+
+                    questionText = `相似な2つの立体 $X, Y$ があり、相似比は $${a}:${b}$ です。<br>立体 $X$ の体積が $${volA}$ $\\text{cm}^3$ のとき、立体 $Y$ の体積を求めなさい。`;
+                    targetVal = volB;
+                    unit = "cm³";
+                    explanation = `<strong>体積比は相似比の3乗</strong><br>
+                    相似比が $${a}:${b}$ なので、体積比は $${a}^3 : ${b}^3 = ${a*a*a} : ${b*b*b}$ となります。<br>
+                    立体 $Y$ の体積を $x$ とすると、<br>
+                    $${a*a*a} : ${b*b*b} = ${volA} : x$<br>
+                    $${a*a*a}x = ${b*b*b * volA} \\implies x = ${volB}$`;
+
+                } else {
+                    // Type 4: Thales' Pyramid Problem (Word Problem)
+                    isApplied = true;
+                    const stickHeight = 2; // 2m stick
+                    const stickShadow = Math.floor(Math.random() * 3) + 3; // 3, 4, 5m shadow
+                    
+                    const multiplier = Math.floor(Math.random() * 10) + 10; // 10 to 19
+                    const buildingShadow = stickShadow * multiplier;
+                    const buildingHeight = stickHeight * multiplier;
+
+                    questionText = `長さ ${stickHeight}m の棒を垂直に立てたとき、その影の長さは ${stickShadow}m でした。<br>全く同じ時刻に、ある建物の影の長さを測ると ${buildingShadow}m でした。<br>この建物の高さは何mですか？`;
+                    targetVal = buildingHeight;
+                    unit = "m";
+                    explanation = `<strong>太陽光による直角三角形の相似を利用する</strong><br>
+                    「棒の高さ：棒の影 = 建物の高さ：建物の影」の比例式が成り立ちます。<br>
+                    建物の高さを $x$ とすると、<br>
+                    $${stickHeight} : ${stickShadow} = x : ${buildingShadow}$<br>
+                    $${stickShadow}x = ${stickHeight} \\times ${buildingShadow}$<br>
+                    $${stickShadow}x = ${stickHeight * buildingShadow} \\implies x = ${buildingHeight}$`;
+                }
+
+                problems.push({
+                    id: i + 1,
+                    text: questionText,
+                    val: targetVal,
+                    explanation: explanation,
+                    unit: unit,
+                    isApplied: isApplied
+                });
+            }
+            
+            return problems;
+        }
+
+        // --- 3. Rendering Quiz HTML ---
+        function generateQuizHTML() {
+            currentQuestions = generateSimilarity();
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = ''; // Clear
+
+            currentQuestions.forEach(q => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-8 rounded-3xl border border-slate-200 shadow-sm transition-all hover:shadow-md dark:bg-slate-800 dark:border-slate-700 relative overflow-hidden";
+                
+                // Logic to show "応用問題" badge
+                const badgeHtml = q.isApplied ? `<span class="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">応用問題</span>` : '';
+                const displayUnit = q.unit || "";
+
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 w-2 h-full bg-indigo-500"></div>
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 font-bold px-4 py-1.5 rounded-full text-sm tracking-wide">Q.${q.id}</span>
+                        ${badgeHtml}
+                    </div>
+                    <div class="text-slate-800 dark:text-slate-200 mb-8 text-lg leading-relaxed font-medium serif-text">
+                        ${q.text}
+                    </div>
+                    <div class="flex gap-4 items-center mb-6">
+                        <input type="number" id="q${q.id}-input" class="quiz-input w-full p-4 border-2 border-slate-200 rounded-2xl font-bold text-xl text-slate-700 placeholder-slate-300 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100" placeholder="答えを入力" step="0.1">
+                        <span class="font-bold text-slate-400 text-xl whitespace-nowrap">${displayUnit}</span>
+                    </div>
+                    <button onclick="checkAnswer(${q.id})" class="group w-full bg-slate-800 text-white font-bold py-4 rounded-2xl hover:bg-slate-700 transition-all shadow-lg shadow-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 dark:shadow-none flex items-center justify-center gap-2">
+                        <span>答え合わせ</span>
+                        <!-- Bootstrap Icon: arrow-right-circle -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="opacity-50 group-hover:opacity-100 transition-opacity" viewBox="0 0 16 16">
+                           <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+                        </svg>
+                    </button>
+                    
+                    <div id="q${q.id}-feedback" class="feedback-box bg-slate-100 dark:bg-slate-900/50"></div>
+                `;
+                container.appendChild(card);
+            });
+
+            // Re-render MathJax/KaTeX for the new content
+            renderMath();
+        }
+
+        // --- 4. Validation Logic ---
+        function checkAnswer(qId) {
+            // qId is 1-based index
+            const data = currentQuestions[qId - 1];
+            const input = document.getElementById(`q${qId}-input`);
+            const feedback = document.getElementById(`q${qId}-feedback`);
+            const userVal = parseFloat(input.value);
+
+            feedback.style.display = 'block';
+            input.classList.remove('correct-answer', 'incorrect-answer');
+
+            // Exact match for integer answers
+            if (Math.abs(userVal - data.val) < 0.001) {
+                // Correct
+                input.classList.add('correct-answer');
+                feedback.innerHTML = `
+                    <div class="text-green-700 dark:text-green-400 font-bold text-lg mb-3 flex items-center gap-2">
+                        <!-- Bootstrap Icon: check-circle-fill -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                        正解です！
+                    </div>
+                    <div class="mt-3 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-green-200 dark:border-green-800 text-slate-700 dark:text-slate-300 shadow-sm leading-relaxed">
+                        <strong class="text-green-800 dark:text-green-300 block mb-2 text-sm uppercase tracking-wider">Solution</strong>
+                        ${data.explanation}
+                    </div>
+                `;
+                feedback.className = "feedback-box bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800";
+            } else {
+                // Incorrect
+                input.classList.add('incorrect-answer');
+                const displayUnit = data.unit || "";
+                
+                feedback.innerHTML = `
+                    <div class="text-red-700 dark:text-red-400 font-bold text-lg mb-3 flex items-center gap-2">
+                        <!-- Bootstrap Icon: x-circle-fill -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+                        </svg>
+                        不正解です...
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 mb-4 text-sm">比例式の計算か、面積比・体積比のルール（2乗、3乗）を見直してみましょう。</p>
+                    <div class="pt-4 border-t border-red-200 dark:border-red-800">
+                        <button onclick="document.getElementById('reveal-${qId}').classList.remove('hidden')" class="text-red-600 dark:text-red-400 font-bold text-sm hover:text-red-800 dark:hover:text-red-300 underline decoration-2 underline-offset-4">
+                            答えと解説を見る
+                        </button>
+                        <div id="reveal-${qId}" class="hidden mt-4 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-red-200 dark:border-red-800 text-slate-700 dark:text-slate-300 shadow-sm leading-relaxed">
+                             <div class="mb-3 text-lg font-bold text-red-700 dark:text-red-400 border-b border-red-100 dark:border-red-900 pb-2">正解：${data.val} ${displayUnit}</div>
+                             <div class="text-sm">${data.explanation}</div>
+                        </div>
+                    </div>
+                `;
+                feedback.className = "feedback-box bg-red-50 border border-red-200 dark:bg-red-900/20 dark:border-red-800";
+            }
+            renderMath(); // Re-render math in feedback
+        }
+
+        // --- 5. Event Listeners ---
+        const quizTrigger = document.getElementById('quizTrigger');
+        const quizPanel = document.getElementById('quizPanel');
+        const closeQuiz = document.getElementById('closeQuiz');
+        const generateBtn = document.getElementById('generateBtn');
+
+        quizTrigger.addEventListener('click', () => {
+            quizPanel.classList.add('active');
+            if (currentQuestions.length === 0) {
+                // Initial prompt is shown, user clicks generate
+            }
+        });
+
+        closeQuiz.addEventListener('click', () => {
+            quizPanel.classList.remove('active');
+        });
+
+        generateBtn.addEventListener('click', () => {
+            generateQuizHTML();
+            const container = document.getElementById('quizContainer');
+            if (container) container.scrollTop = 0;
+        });
+
+        // Initialize KaTeX on load
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMath();
+        });
+    </script>
+</body>
+</html>
